@@ -1,0 +1,11 @@
+.DS_Store
+business/
+public/videos/
+SITE-PARA-PUBLICAR/
+_deploy/
+*.zip
+.claude/
+node_modules/
+av-hero-A.png
+av-hero-B.png
+av-hero-C.png
