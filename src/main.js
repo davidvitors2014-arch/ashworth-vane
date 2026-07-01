@@ -45,37 +45,52 @@ window.addEventListener('load', () => {
 function initHeroCanvas() {
   const canvas = document.querySelector('.hero-canvas');
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
+  // Opaque context (alpha:false) composites faster — the photo always fills the canvas.
+  const ctx = canvas.getContext('2d', { alpha: false });
   const frameCount = 122;
   const urlFor = (i) => `public/frames/frame${String(i).padStart(4, '0')}.jpg`;
 
+  // Preload every frame and DECODE it up front, so scrubbing never stalls on a
+  // just-in-time decode (the main cause of scroll stutter in frame-sequence heroes).
   const images = [];
   for (let i = 1; i <= frameCount; i++) {
     const img = new Image();
-    if (i === 1) img.onload = render;
+    img.decoding = 'async';
     img.src = urlFor(i);
+    if (typeof img.decode === 'function') {
+      img.decode().then(() => { if (i === 1) render(true); }).catch(() => {});
+    } else if (i === 1) {
+      img.onload = () => render(true);
+    }
     images.push(img);
   }
 
   const state = { frame: 0 };
-  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  // Cap device-pixel-ratio for the canvas: the hero is a photo, so 1.5 is
+  // visually indistinguishable from 2 but roughly halves the per-frame fill cost.
+  // (Titles/captions are DOM text and stay crisp regardless.)
+  const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+  let lastDrawn = -1;
 
   function resize() {
     canvas.width = Math.floor(canvas.clientWidth * dpr);
     canvas.height = Math.floor(canvas.clientHeight * dpr);
-    render();
+    lastDrawn = -1;      // force one redraw at the new size
+    render(true);
   }
 
-  function render() {
-    const img = images[Math.round(state.frame)];
+  function render(force) {
+    const idx = Math.round(state.frame);
+    if (!force && idx === lastDrawn) return;   // skip redundant redraws (huge win)
+    const img = images[idx];
     if (!img || !img.complete || !img.naturalWidth) return;
+    lastDrawn = idx;
     const cw = canvas.width, ch = canvas.height;
     const ir = img.naturalWidth / img.naturalHeight, cr = cw / ch;
     let dw, dh, dx, dy;
     if (cr > ir) { dw = cw; dh = cw / ir; dx = 0; dy = (ch - dh) / 2; }
     else { dh = ch; dw = ch * ir; dy = 0; dx = (cw - dw) / 2; }
-    ctx.clearRect(0, 0, cw, ch);
-    ctx.drawImage(img, dx, dy, dw, dh);
+    ctx.drawImage(img, dx, dy, dw, dh);        // opaque cover → no clearRect needed
   }
 
   resize();
