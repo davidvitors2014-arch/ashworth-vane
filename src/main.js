@@ -47,8 +47,8 @@ function initHeroCanvas() {
   if (!canvas) return;
   // Opaque context (alpha:false) composites faster — the photo always fills the canvas.
   const ctx = canvas.getContext('2d', { alpha: false });
-  const frameCount = 242;
-  const urlFor = (i) => `public/frames/frame${String(i).padStart(4, '0')}.jpg?v=6`;
+  const frameCount = 402;
+  const urlFor = (i) => `public/frames/frame${String(i).padStart(4, '0')}.jpg?v=7`;
 
   // Preload every frame and DECODE it up front, so scrubbing never stalls on a
   // just-in-time decode (the main cause of scroll stutter in frame-sequence heroes).
@@ -117,11 +117,11 @@ function initHeroCanvas() {
     scrollTrigger: { trigger: '.hero', start: 'top top', end: 'bottom bottom', scrub: true },
   });
   heroTl
-    .to('.hero-content', { opacity: 0, y: -40, duration: 0.06 }, 0.12)
-    .fromTo('[data-cap="living"]', { opacity: 0, y: 32 }, { opacity: 1, y: 0, duration: 0.06 }, 0.34)
-    .to('[data-cap="living"]', { opacity: 0, y: -32, duration: 0.06 }, 0.54)
-    .fromTo('[data-cap="kitchen"]', { opacity: 0, y: 32 }, { opacity: 1, y: 0, duration: 0.06 }, 0.80)
-    .to({}, { duration: 0.06 }, 0.96); // pad so timeline positions ≈ scroll fraction
+    .to('.hero-content', { opacity: 0, y: -40, duration: 0.06 }, 0.14)
+    .fromTo('[data-cap="living"]', { opacity: 0, y: 32 }, { opacity: 1, y: 0, duration: 0.06 }, 0.42)
+    .to('[data-cap="living"]', { opacity: 0, y: -32, duration: 0.06 }, 0.62)
+    .fromTo('[data-cap="kitchen"]', { opacity: 0, y: 32 }, { opacity: 1, y: 0, duration: 0.06 }, 0.85)
+    .to({}, { duration: 0.06 }, 0.97); // pad so timeline positions ≈ scroll fraction
 
   gsap.to('.scroll-cue', {
     opacity: 0, ease: 'none',
