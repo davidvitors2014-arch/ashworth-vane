@@ -48,7 +48,7 @@ function initHeroCanvas() {
   // Opaque context (alpha:false) composites faster — the photo always fills the canvas.
   const ctx = canvas.getContext('2d', { alpha: false });
   const frameCount = 402;
-  const urlFor = (i) => `public/frames/frame${String(i).padStart(4, '0')}.jpg?v=8`;
+  const urlFor = (i) => `public/frames/frame${String(i).padStart(4, '0')}.jpg?v=11`;
 
   // Preload every frame and DECODE it up front, so scrubbing never stalls on a
   // just-in-time decode (the main cause of scroll stutter in frame-sequence heroes).
