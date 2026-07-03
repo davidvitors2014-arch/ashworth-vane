@@ -130,15 +130,34 @@ function initHeroCanvas() {
 }
 
 /* ---- 3 · Cinematic text reveals (SplitType) ---- */
-function buildScrollReveals() {
+// Rebuilt on resize so a wrong-width layout at load (preview glitch, orientation
+// change, mobile URL-bar resize) can never permanently bake one-word-per-line breaks.
+let splitInstances = [];
+function buildSplits() {
+  ScrollTrigger.getAll().forEach((st) => {
+    if (st.trigger && st.trigger.classList && st.trigger.classList.contains('split-lines')) st.kill();
+  });
+  splitInstances.forEach((s) => s.revert());
+  splitInstances = [];
   document.querySelectorAll('.split-lines').forEach((el) => {
     const split = new SplitType(el, { types: 'lines' });
+    splitInstances.push(split);
     gsap.set(split.lines, { yPercent: 110, opacity: 0 });
     gsap.to(split.lines, {
       yPercent: 0, opacity: 1, duration: 1.1, ease: 'power4.out', stagger: 0.12,
       scrollTrigger: { trigger: el, start: 'top 82%' },
     });
   });
+  ScrollTrigger.refresh();
+}
+
+function buildScrollReveals() {
+  buildSplits();
+  if (!window.__splitResizeBound) {
+    window.__splitResizeBound = true;
+    let splitRT;
+    window.addEventListener('resize', () => { clearTimeout(splitRT); splitRT = setTimeout(buildSplits, 250); });
+  }
 
   // Generic fade-ups (non-hero)
   gsap.utils.toArray('.reveal-up').forEach((el) => {
